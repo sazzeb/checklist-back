@@ -1,0 +1,73 @@
+name: checklist
+
+services:
+
+    service:
+        build: 
+            context: .
+            dockerfile: ./docker/production/Dockerfile
+        container_name: service
+        env_file:
+            -   .env
+        hostname: service
+        ports:
+            - 9009:9009
+        volumes:
+            - ./src/:/app/src/
+            - .env/:/app/.env
+        restart: always
+        environment:
+            NODE_ENV: docker
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        networks:
+            - app-network
+        depends_on:
+            - redis
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost:9009/health" ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    redis:
+        image: redis:latest
+        container_name: redis
+        hostname: redis
+        restart: always
+        ports:
+            - '6379:6379'
+        volumes:
+            - redis_data:/data
+        networks:
+            - app-network
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 10s
+            timeout: 30s
+            retries: 5
+
+    redis-bullboard:
+        image: deadly0/bull-board:latest
+        container_name: redis-bullboard
+        hostname: redis-bullboard
+        restart: always
+        ports:
+            - 3010:3000
+        networks:
+            - app-network
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - BULL_PREFIX=bull
+            - USER_LOGIN=admin
+            - USER_PASSWORD=admin123
+        depends_on:
+            - redis
+
+volumes:
+    redis_data:
+
+networks:
+    app-network:
+        driver: bridge
