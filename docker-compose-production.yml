@@ -7,7 +7,7 @@ services:
             context: .
             dockerfile: Dockerfile.prod
         container_name: service
-        image: 084375567079.dkr.ecr.us-east-2.amazonaws.com/checklist-back:latest
+#        image: 084375567079.dkr.ecr.us-east-2.amazonaws.com/checklist-back:latest
         env_file:
             -   .env
         hostname: service
