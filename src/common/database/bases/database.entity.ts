@@ -6,14 +6,14 @@ export class DatabaseEntityBase {
         type: String,
         default: uuidV4,
     })
-    _id?: string;
+    _id: string;
 
     @DatabaseProp({
         required: true,
         index: true,
         default: false,
     })
-    deleted?: boolean;
+    deleted: boolean;
 
     @DatabaseProp({
         required: false,

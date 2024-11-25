@@ -280,7 +280,7 @@ export class CountryEntity extends DatabaseEntityBase {
 
     @DatabaseProp({
         optional: true,
-        type: [{ type: String, trim: true, optional: true }],
+        type: [{ type: Object, trim: true, optional: true }],
     })
     state?: StatesCountries[];
 

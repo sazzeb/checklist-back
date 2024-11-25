@@ -21,11 +21,34 @@ import {
 } from 'src/modules/country/repository/entities/country.entity';
 import { CountryRepository } from 'src/modules/country/repository/repositories/country.repository';
 import { CountryGetResponseDto } from '../dtos/response/country.get.response.dto';
-import { CountryJsonDataDetails } from '../interfaces/country.json.data.details';
 
 @Injectable()
 export class CountryService implements ICountryService {
     constructor(private readonly countryRepository: CountryRepository) {}
+
+    private validateEntity(entity: CountryEntity): string[] {
+        const errors: string[] = [];
+
+        if (!entity.name || typeof entity.name !== 'string') {
+            errors.push('Invalid or missing "name" field.');
+        }
+        if (!entity.alpha2Code || typeof entity.alpha2Code !== 'string') {
+            errors.push('Invalid or missing "alpha2Code" field.');
+        }
+        if (!entity.alpha3Code || typeof entity.alpha3Code !== 'string') {
+            errors.push('Invalid or missing "alpha3Code" field.');
+        }
+        if (!entity.numericCode || isNaN(Number(entity.numericCode))) {
+            errors.push('Invalid or missing "numericCode" field.');
+        }
+        if (!entity.phoneCode || isNaN(Number(entity.phoneCode))) {
+            errors.push('Invalid or missing "phoneCode" field.');
+        }
+
+        // Add additional field validations as required
+
+        return errors;
+    }
 
     async findAll(
         find?: Record<string, any>,
@@ -165,7 +188,7 @@ export class CountryService implements ICountryService {
                 if (fs.existsSync(countryFilePath)) {
                     const countryDetail = JSON.parse(
                         fs.readFileSync(countryFilePath, 'utf-8')
-                    );
+                    )[countryCode];
 
                     const extendedDetails = countryExtendedData.find(
                         (item: { iso2: string }) => item.iso2 === countryCode
@@ -187,8 +210,12 @@ export class CountryService implements ICountryService {
                             currency_symbol: extendedDetails.currency_symbol,
                             distanceUnit: countryDetail.distance_unit,
                             gec: countryDetail.gec,
-                            g7Member: countryDetail.g7_member,
-                            g20Member: countryDetail.g20_member,
+                            g7Member: countryDetail.g7_member
+                                ? countryDetail.g7_member
+                                : false,
+                            g20Member: countryDetail.g20_member
+                                ? countryDetail.g20_member
+                                : false,
                             international_prefix:
                                 countryDetail.international_prefix,
                             ioc: countryDetail.ioc,
@@ -242,22 +269,44 @@ export class CountryService implements ICountryService {
         options?: IDatabaseCreateManyOptions
     ): Promise<boolean> {
         try {
-            // Generate country data from JSON
+            // Step 1: Generate country data from JSON
             const countryEntities: CountryEntity[] =
                 await this.generateCountriesJson();
 
-            // Check if data is available before attempting to create
+            // Step 2: Check if data is available before attempting to create
             if (!countryEntities || countryEntities.length === 0) {
                 console.warn('No countries were generated for createMany.');
                 return false;
             }
 
-            // Save the data to the repository
+            // Step 3: Validate each entity
+            const invalidEntities = [];
+            for (const entity of countryEntities) {
+                const validationErrors = this.validateEntity(entity);
+                if (validationErrors.length > 0) {
+                    invalidEntities.push({ entity, validationErrors });
+                }
+            }
+
+            if (invalidEntities.length > 0) {
+                console.error(
+                    `Validation failed for ${invalidEntities.length} entities. Details:`,
+                    invalidEntities
+                );
+                throw new Error(
+                    `Validation errors encountered. Check logs for detailed information.`
+                );
+            }
+
+            // Step 4: Save valid entities to the repository
             await this.countryRepository.createMany(countryEntities, options);
+
             return true;
         } catch (err) {
             console.error('Error during generateCreateMany:', err);
-            return false;
+            throw new Error(
+                `Failed to execute generateCreateMany: ${err.message}`
+            );
         }
     }
 

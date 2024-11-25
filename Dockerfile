@@ -15,7 +15,7 @@ ENV NODE_ENV=${NODE_ENV}
 
 EXPOSE 9009
 
-COPY . .
+COPY docker .
 
 RUN touch .env
 

@@ -1,0 +1,64 @@
+# Stage 1: Development Build
+FROM node:alpine AS development
+
+# Maintainer information
+LABEL maintainer="eko.5samuel@gmail.com"
+
+# Set the working directory
+WORKDIR /app
+
+# Install dependencies for native module compilation
+RUN apk add --no-cache make g++ python3
+
+# Copy dependency files
+COPY package*.json yarn.lock ./
+
+# Install development dependencies
+RUN yarn global add rimraf
+RUN yarn install --only=development
+
+# Rebuild native modules
+RUN npm rebuild @sentry/profiling-node
+
+# Copy the application source code
+COPY . .
+
+# Build the application
+RUN yarn build
+
+# Stage 2: Production Build
+FROM node:alpine AS production
+
+# Set environment variables
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+# Set the working directory
+WORKDIR /app
+
+# Install dependencies for native module compilation
+RUN apk add --no-cache make g++ python3
+
+# Expose necessary ports
+EXPOSE 9229
+EXPOSE 6379
+
+# Copy dependency files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN yarn install --production=true
+
+# Rebuild native modules
+RUN npm rebuild @sentry/profiling-node
+
+# Install global tools
+RUN yarn global add @nestjs/cli pm2
+
+# Copy built application from the development stage
+COPY --from=development /app/dist ./dist
+
+# Start the application using PM2
+CMD ["pm2-runtime", "dist/main.js"]
+
+
