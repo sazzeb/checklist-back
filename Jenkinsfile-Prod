@@ -43,7 +43,8 @@ pipeline {
 
     post {
         always {
-            sh "docker-compose -f ${DOCKER_COMPOSE_FILE} -p ${PROJECT_NAME} down"
+            sh "docker compose -p ${PROJECT_NAME} down"
+            sh "docker system prune -a --volumes -f"
             sh 'rm -f .env' // Clean up the .env file
         }
     }
