@@ -55,14 +55,14 @@ docker-compose up -d
 
 
 ```bash
-docker-compose -f docker-compose-production.yml up --build -d
+docker-compose -f compose.yaml up --build -d
 
 ```
 
 ## To turn of production Docker ready
 
 ```bash
-docker-compose -f docker-compose-production.yml dowun
+docker-compose -f compose.yaml dowun
 ```
 
 ## Test
