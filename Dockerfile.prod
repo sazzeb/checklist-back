@@ -60,5 +60,3 @@ COPY --from=development /app/dist ./dist
 
 # Start the application using PM2
 CMD ["pm2-runtime", "dist/main.js"]
-
-
