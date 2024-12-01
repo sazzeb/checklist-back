@@ -44,10 +44,7 @@ export class AppHttpFilter implements ExceptionFilter {
             !request.path.startsWith(this.globalPrefix) &&
             !request.path.startsWith(this.docPrefix)
         ) {
-            response.redirect(
-                HttpStatus.PERMANENT_REDIRECT,
-                '/api/public/hello'
-            );
+            response.redirect(HttpStatus.PERMANENT_REDIRECT, '/docs');
 
             return;
         }

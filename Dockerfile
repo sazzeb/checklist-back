@@ -1,5 +1,5 @@
-FROM node:lts-alpine
-LABEL maintainer "eko.5samuel@gmail.com"
+FROM node:23-alpine
+LABEL maintainer = "eko.5samuel@gmail.com"
 
 WORKDIR /app
 

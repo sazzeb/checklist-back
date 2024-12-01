@@ -1,5 +1,5 @@
 # Stage 1: Development Build
-FROM node:alpine AS development
+FROM node:23-alpine AS development
 
 # Maintainer information
 LABEL maintainer="eko.5samuel@gmail.com"
@@ -27,7 +27,7 @@ COPY . .
 RUN yarn build
 
 # Stage 2: Production Build
-FROM node:alpine AS production
+FROM node:23-alpine AS production
 
 # Set environment variables
 ARG NODE_ENV=production
