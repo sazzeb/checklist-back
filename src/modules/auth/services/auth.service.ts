@@ -20,6 +20,10 @@ import { plainToInstance } from 'class-transformer';
 import { IUserDoc } from 'src/modules/user/interfaces/user.interface';
 import { AuthLoginResponseDto } from 'src/modules/auth/dtos/response/auth.login.response.dto';
 import { Duration } from 'luxon';
+import process from 'node:process';
+import { HelperTimeConvertService } from '../../../common/helper/services/helper.time.convert.service';
+
+const env = process.env;
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -60,15 +64,15 @@ export class AuthService implements IAuthService {
         this.jwtAccessTokenSecretKey = this.configService.get<string>(
             'auth.jwt.accessToken.secretKey'
         );
-        this.jwtAccessTokenExpirationTime = this.configService.get<number>(
-            'auth.jwt.accessToken.expirationTime'
+        this.jwtAccessTokenExpirationTime = HelperTimeConvertService(
+            env.AUTH_JWT_ACCESS_TOKEN_EXPIRED
         );
 
         this.jwtRefreshTokenSecretKey = this.configService.get<string>(
             'auth.jwt.refreshToken.secretKey'
         );
-        this.jwtRefreshTokenExpirationTime = this.configService.get<number>(
-            'auth.jwt.refreshToken.expirationTime'
+        this.jwtRefreshTokenExpirationTime = HelperTimeConvertService(
+            env.AUTH_JWT_REFRESH_TOKEN_EXPIRED
         );
 
         this.jwtPrefixAuthorization = this.configService.get<string>(
@@ -78,11 +82,11 @@ export class AuthService implements IAuthService {
         this.jwtIssuer = this.configService.get<string>('auth.jwt.issuer');
 
         // password
-        this.passwordExpiredIn = this.configService.get<number>(
-            'auth.password.expiredIn'
+        this.passwordExpiredIn = HelperTimeConvertService(
+            env.AUTH_JWT_PASSWORD_EXPIRED_IN
         );
-        this.passwordExpiredTemporary = this.configService.get<number>(
-            'auth.password.expiredInTemporary'
+        this.passwordExpiredTemporary = HelperTimeConvertService(
+            env.AUTH_JWT_PASSSWORD_EXPIRED_TEMPORARY
         );
         this.passwordSaltLength = this.configService.get<number>(
             'auth.password.saltLength'
