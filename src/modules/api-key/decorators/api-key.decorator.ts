@@ -24,7 +24,10 @@ export const ApiKeyPayload: () => ParameterDecorator = createParamDecorator(
 export function ApiKeySystemProtected(): MethodDecorator {
     return applyDecorators(
         UseGuards(ApiKeyXApiKeyGuard, ApiKeyXApiKeyTypeGuard),
-        SetMetadata(API_KEY_X_TYPE_META_KEY, [ENUM_API_KEY_TYPE.SYSTEM])
+        SetMetadata(API_KEY_X_TYPE_META_KEY, [
+            ENUM_API_KEY_TYPE.SYSTEM,
+            ENUM_API_KEY_TYPE.DEFAULT,
+        ])
     );
 }
 

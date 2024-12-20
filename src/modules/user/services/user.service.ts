@@ -48,6 +48,8 @@ import { CountryTableName } from 'src/modules/country/repository/entities/countr
 import { RoleTableName } from 'src/modules/role/repository/entities/role.entity';
 import { UserUpdateStatusRequestDto } from 'src/modules/user/dtos/request/user.update-status.request.dto';
 import { DatabaseHelperQueryContain } from 'src/common/database/decorators/database.decorator';
+import { pl } from '@faker-js/faker';
+import { CountryDetailShortResponseDto } from '../../country/dtos/response/country.detail.short.response.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -547,10 +549,34 @@ export class UserService implements IUserService {
     async mapProfile(
         user: IUserDoc | IUserEntity
     ): Promise<UserProfileResponseDto> {
-        return plainToInstance(
-            UserProfileResponseDto,
-            user instanceof Document ? user.toObject() : user
-        );
+        const userObject = user instanceof Document ? user.toObject() : user;
+
+        return plainToInstance(UserProfileResponseDto, {
+            ...userObject,
+            country: plainToInstance(CountryDetailShortResponseDto, {
+                name: userObject.country?.name,
+                alpha2Code: userObject.country?.alpha2Code,
+                alpha3Code: userObject.country?.alpha3Code,
+                numericCode: userObject.country?.numericCode,
+                fipsCode: userObject.country?.fipsCode,
+                phoneCode: userObject.country?.phoneCode,
+                continent: userObject.country?.continent,
+                currency: userObject.country?.currency,
+                domain: userObject.country?.domain,
+                countryCode: userObject.country?.countryCode,
+                distanceUnit: userObject.country?.distanceUnit,
+                g7Member: userObject.country?.g7Member,
+                g20Member: userObject.country?.g20Member,
+                gec: userObject.country?.gec,
+                international_prefix: userObject.country?.international_prefix,
+                ioc: userObject.country?.ioc,
+                iso_long_name: userObject.country?.iso_long_name,
+                iso_short_name: userObject.country?.iso_short_name,
+                nationality: userObject.country?.nationality,
+                number: userObject.country?.number,
+                emoji: userObject.country?.emoji,
+            }),
+        });
     }
 
     async mapList(

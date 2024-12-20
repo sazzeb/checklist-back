@@ -40,7 +40,7 @@ WORKDIR /app
 RUN apk add --no-cache make g++ python3
 
 # Expose necessary ports
-EXPOSE 9229
+EXPOSE 9009
 EXPOSE 6379
 
 # Copy dependency files

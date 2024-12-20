@@ -1,9 +1,4 @@
-import {
-    BadRequestException,
-    Controller,
-    Get,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiKeySystemProtected } from 'src/modules/api-key/decorators/api-key.decorator';
 import { PaginationQuery } from 'src/common/pagination/decorators/pagination.decorator';
@@ -78,10 +73,10 @@ export class CountrySystemController {
     }
 
     @CountrySystemGetDoc()
-    @Response('country.index')
+    @Response('country.generate')
     @ApiKeySystemProtected()
-    @Get('/get')
-    async index(): Promise<IResponse<boolean>> {
+    @Get('/countries/generate')
+    async generate(): Promise<IResponse<boolean>> {
         try {
             const data = await this.countryService.generateCreateMany();
             return {

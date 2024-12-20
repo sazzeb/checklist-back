@@ -1,6 +1,7 @@
 {
     "index": "Country fetched successfully.",
     "list": "List of countries retrieved successfully.",
+    "generate": "Multiple countries generated successfully",
     "error": {
         "countries": "Countries not generated successfully."
     }
