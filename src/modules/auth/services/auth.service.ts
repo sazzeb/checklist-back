@@ -86,8 +86,9 @@ export class AuthService implements IAuthService {
             env.AUTH_JWT_PASSWORD_EXPIRED_IN
         );
         this.passwordExpiredTemporary = HelperTimeConvertService(
-            env.AUTH_JWT_PASSSWORD_EXPIRED_TEMPORARY
+            env.AUTH_JWT_PASSWORD_EXPIRED_TEMPORARY
         );
+
         this.passwordSaltLength = this.configService.get<number>(
             'auth.password.saltLength'
         );
