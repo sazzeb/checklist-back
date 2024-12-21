@@ -3,6 +3,7 @@
     "list": "List of countries retrieved successfully.",
     "generate": "Multiple countries generated successfully",
     "error": {
-        "countries": "Countries not generated successfully."
+        "countries": "Countries not generated successfully.",
+        "notFound": "The requested country was not found."
     }
 }
