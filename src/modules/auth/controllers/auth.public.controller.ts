@@ -372,7 +372,6 @@ export class AuthPublicController {
         }
 
         const password = await this.authService.createPassword(passwordString);
-
         const session: ClientSession =
             await this.databaseConnection.startSession();
         session.startTransaction();

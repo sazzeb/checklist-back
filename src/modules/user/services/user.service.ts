@@ -347,8 +347,7 @@ export class UserService implements IUserService {
         options?: IDatabaseOptions
     ): Promise<boolean> {
         return this.userRepository.exists(
-            DatabaseHelperQueryContain('email', email, { fullWord: true }),
-            { ...options, withDeleted: true }
+            DatabaseHelperQueryContain('email', email, { fullWord: true })
         );
     }
 

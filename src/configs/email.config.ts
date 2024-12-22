@@ -4,9 +4,9 @@ export default registerAs(
     'email',
     (): Record<string, any> => ({
         name: process.env.APP_NAME,
-        fromEmail: 'noreply@mail.com',
-        supportEmail: 'support@mail.com',
+        fromEmail: 'info@enrolledagent.com',
+        supportEmail: 'info@enrolledagent.com',
 
-        clientUrl: process.env.CLIENT_URL ?? 'https://example.com',
+        clientUrl: process.env.CLIENT_URL ?? 'EnrolledAgent.com',
     })
 );
