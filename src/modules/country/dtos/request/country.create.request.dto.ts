@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
-    ArrayNotEmpty,
     IsArray,
     IsNotEmpty,
     IsOptional,

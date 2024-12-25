@@ -16,6 +16,7 @@ export interface IAwsS3PutItemWithAclOptions extends IAwsS3Options {
 }
 
 export interface IAwsS3PresignOptions extends IAwsS3Options {
+    path?: string;
     allowedSize?: number;
 }
 

@@ -5,6 +5,7 @@ import { RoutesPublicModule } from 'src/router/routes/routes.public.module';
 import { RoutesAdminModule } from 'src/router/routes/routes.admin.module';
 import { RoutesSystemModule } from 'src/router/routes/routes.system.module';
 import { RoutesSharedModule } from 'src/router/routes/routes.shared.module';
+import { RoutesWorkflowModule } from './routes/routes.workflow.module';
 
 @Module({
     providers: [],
@@ -16,6 +17,7 @@ import { RoutesSharedModule } from 'src/router/routes/routes.shared.module';
         RoutesUserModule,
         RoutesAdminModule,
         RoutesSharedModule,
+        RoutesWorkflowModule,
         NestJsRouterModule.register([
             {
                 path: '/public',
@@ -36,6 +38,10 @@ import { RoutesSharedModule } from 'src/router/routes/routes.shared.module';
             {
                 path: '/shared',
                 module: RoutesSharedModule,
+            },
+            {
+                path: 'workflow',
+                module: RoutesWorkflowModule,
             },
         ]),
     ],
