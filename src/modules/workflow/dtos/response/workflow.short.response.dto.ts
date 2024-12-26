@@ -4,11 +4,15 @@ import { Exclude } from 'class-transformer';
 
 export class WorkflowShortResponseDto extends OmitType(
     WorkflowListResponseDto,
-    ['createdAt', 'updatedAt', 'plan_list']
+    ['createdAt', 'updatedAt', 'plan_list', 'plan']
 ) {
     @ApiHideProperty()
     @Exclude()
-    plan_list: string[];
+    plan: string;
+
+    @ApiHideProperty()
+    @Exclude()
+    plan_list?: string[];
 
     @ApiHideProperty()
     @Exclude()

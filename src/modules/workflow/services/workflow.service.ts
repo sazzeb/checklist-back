@@ -1,19 +1,25 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { IWorkflowService } from '../interfaces/workflow.service.interface';
 import { WorkflowRepository } from '../repository/repositories/workflow.repositories';
+import { Document } from 'mongoose';
 import {
     IDatabaseCreateManyOptions,
     IDatabaseDeleteManyOptions,
     IDatabaseFindAllOptions,
     IDatabaseFindOneOptions,
     IDatabaseGetTotalOptions,
+    IDatabaseSaveOptions,
 } from 'src/common/database/interfaces/database.interface';
 import {
     WorkFlowDoc,
     WorkFlowEntity,
 } from 'src/modules/workflow/repository/entity/workflow.entity';
 import { WorkflowCreateRequestDto } from 'src/modules/workflow/dtos/request/workflow.create.request.dto';
-import { use } from 'passport';
+import { WorkflowListResponseDto } from '../dtos/response/workflow.list.response.dto';
+import { plainToInstance } from 'class-transformer';
+import { WorkflowUpdateRequestDto } from '../dtos/request/workflow.update.request.dto';
+import { WorkflowFilterStartEnd } from '../constants/workflow.filter.start.end';
+import { WorkflowShortResponseDto } from '../dtos/response/workflow.short.response.dto';
 
 @Injectable()
 export class WorkflowService implements IWorkflowService {
@@ -39,6 +45,39 @@ export class WorkflowService implements IWorkflowService {
         options?: IDatabaseFindAllOptions
     ): Promise<WorkFlowDoc[]> {
         return this.workflowRepository.findAll<WorkFlowDoc>(find, options);
+    }
+
+    async findAllByUserAndPlanDate(
+        userId: string,
+        planDate: string,
+        search?: Record<string, any>,
+        options?: IDatabaseFindOneOptions
+    ): Promise<WorkFlowDoc[]> {
+        return this.workflowRepository.findAll<WorkFlowDoc>(
+            { user: userId, plan_date: planDate, ...search },
+            options
+        );
+    }
+
+    async update(
+        plan: WorkFlowDoc,
+        body: WorkflowUpdateRequestDto,
+        options?: IDatabaseSaveOptions
+    ): Promise<WorkFlowDoc> {
+        plan.plan_list = body.plan_list;
+        plan.plan_date = body.plan_date;
+        plan.plan_date = body.plan_date;
+        plan.end_time = body.end_time;
+        plan.start_time = body.start_time;
+
+        return this.workflowRepository.save(plan, options);
+    }
+
+    async findOneById(
+        _id: string,
+        options?: IDatabaseFindOneOptions
+    ): Promise<WorkFlowDoc> {
+        return this.workflowRepository.findOneById(_id, options);
     }
 
     async findOne(
@@ -71,52 +110,90 @@ export class WorkflowService implements IWorkflowService {
         return true;
     }
 
+    async mapList(
+        workflow: WorkFlowDoc[] | WorkFlowEntity[]
+    ): Promise<WorkflowListResponseDto[]> {
+        return plainToInstance(
+            WorkflowListResponseDto,
+            workflow.map((e: WorkFlowDoc | WorkFlowEntity) =>
+                e instanceof Document ? e.toObject() : e
+            )
+        );
+    }
+
+    async mapListShort(
+        workflow: WorkFlowDoc[] | WorkFlowEntity[]
+    ): Promise<WorkflowShortResponseDto[]> {
+        return plainToInstance(
+            WorkflowListResponseDto,
+            workflow.map((e: WorkFlowDoc | WorkFlowEntity) =>
+                e instanceof Document ? e.toObject() : e
+            )
+        );
+    }
+
     async filterWorkflowsByTime(
         userId: string,
         planDate: Date,
         startTime: Date,
         endTime: Date
     ): Promise<WorkFlowDoc[]> {
-        const now = new Date();
-        const currentTimePlus30Min = new Date(now.getTime() + 15 * 60 * 1000); // Current time + 30 minutes
-
-        // Ensure start_time is at least 30 minutes greater than the current time
-        if (startTime <= currentTimePlus30Min) {
-            throw new BadRequestException({
-                message:
-                    'Creating a to plan must be schedule 15 minute from the current time.',
-            });
-        }
-
-        // Ensure start_time is less than end_time
-        if (startTime >= endTime) {
-            throw new BadRequestException({
-                message: 'Start time must be less than end time.',
-            });
-        }
-
-        // Ensure start_time and end_time correspond to the same day as plan_date
-        const isSameDay = (date: Date, targetDate: Date) => {
-            return (
-                date.getUTCFullYear() === targetDate.getUTCFullYear() &&
-                date.getUTCMonth() === targetDate.getUTCMonth() &&
-                date.getUTCDate() === targetDate.getUTCDate()
-            );
-        };
-
-        if (!isSameDay(startTime, planDate) || !isSameDay(endTime, planDate)) {
-            throw new BadRequestException({
-                message:
-                    'Start time and end time must correspond to the same day as the plan date.',
-            });
-        }
-
+        WorkflowFilterStartEnd(
+            planDate,
+            startTime,
+            endTime,
+            'Creating a to plan must be schedule 15 minute from the current time.',
+            'Start time must be less than end time.'
+        );
         // Check for overlaps in the database
         const plans = await this.workflowRepository.exists({
             user: userId,
             plan_date: {
                 $eq: planDate, // Match specific date
             },
+            $or: [
+                {
+                    $and: [
+                        { start_time: { $lte: endTime } }, // Existing start_time is before or at requested endTime
+                        { end_time: { $gte: startTime } }, // Existing end_time is after or at requested startTime
+                    ],
+                },
+            ],
+        });
+
+        // If there are overlapping plans, throw an exception
+        if (plans) {
+            throw new BadRequestException({
+                message:
+                    'The plan time already exists. Choose a different time.',
+            });
+        }
+
+        return;
+    }
+
+    async filterWorkflowsByTimeUpdated(
+        _id: string,
+        userId: string,
+        planDate: Date,
+        startTime: Date,
+        endTime: Date
+    ): Promise<void> {
+        WorkflowFilterStartEnd(
+            planDate,
+            startTime,
+            endTime,
+            'Creating a plan must be scheduled at least 15 minutes from the current time.',
+            'Start time must be less than end time Provided.'
+        );
+
+        // Check for overlaps in the database, excluding the current record (_id)
+        const plans = await this.workflowRepository.exists({
+            user: userId,
+            plan_date: {
+                $eq: planDate, // Match specific date
+            },
+            _id: { $ne: _id }, // Exclude the current record
             $or: [
                 {
                     $and: [
