@@ -13,6 +13,7 @@ import {
     WorkFlowEntity,
 } from 'src/modules/workflow/repository/entity/workflow.entity';
 import { WorkflowCreateRequestDto } from 'src/modules/workflow/dtos/request/workflow.create.request.dto';
+import { use } from 'passport';
 
 @Injectable()
 export class WorkflowService implements IWorkflowService {
@@ -26,7 +27,7 @@ export class WorkflowService implements IWorkflowService {
         create.plan = body.plan;
         create.plan_date = body.plan_date;
         create.start_time = body.start_time;
-        create.end_time = body.ent_time;
+        create.end_time = body.end_time;
         create.user = body.user;
         create.plan_list = body.plan_list;
 
@@ -73,22 +74,10 @@ export class WorkflowService implements IWorkflowService {
     async filterWorkflowsByTime(
         userId: string,
         planDate: Date,
-        startTime: string,
-        endTime: string
+        startTime: Date,
+        endTime: Date
     ): Promise<WorkFlowDoc[]> {
-        const timeToMinutes = (time: string): number => {
-            const [hours, minutes, period] = time
-                .match(/(\d+):(\d+)\s?(AM|PM)/i)
-                .slice(1);
-            let totalMinutes = (parseInt(hours) % 12) * 60 + parseInt(minutes);
-            if (period.toUpperCase() === 'PM') totalMinutes += 12 * 60; // Adjust for PM
-            return totalMinutes;
-        };
-
-        const startMinutes = timeToMinutes(startTime);
-        const endMinutes = timeToMinutes(endTime);
-
-        if (startMinutes >= endMinutes) {
+        if (startTime >= endTime) {
             throw new Error('Start time must be less than end time.');
         }
 

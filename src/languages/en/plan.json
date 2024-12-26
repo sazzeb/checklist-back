@@ -1,0 +1,7 @@
+{
+  "create": "Todo plan created",
+  "error": {
+    "created": "There was an error adding a plan",
+    "notPlan": "Incorrect data provided"
+  }
+}

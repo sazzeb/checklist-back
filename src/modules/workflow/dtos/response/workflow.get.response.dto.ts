@@ -12,10 +12,12 @@ export class WorkflowGetResponseDTO {
     plan_date: Date;
 
     @Expose()
-    start_time: string;
+    @Type(() => Date)
+    start_time: Date;
 
     @Expose()
-    end_time: string;
+    @Type(() => Date)
+    end_time: Date;
 
     @Expose()
     plan_list: string[];

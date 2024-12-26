@@ -1,6 +1,13 @@
 import { WorkflowService } from '../services/workflow.service';
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    HttpCode,
+    HttpStatus,
+    Post,
+} from '@nestjs/common';
 import { WorkflowCreateRequestDto } from 'src/modules/workflow/dtos/request/workflow.create.request.dto';
 import { WorkflowPlanCreateDto } from 'src/modules/workflow/docs/workflow.plan.doc';
 import { Response } from 'src/common/response/decorators/response.decorator';
@@ -18,7 +25,7 @@ import { WorkflowGetResponseDTO } from '../dtos/response/workflow.get.response.d
 
 @ApiTags('workflow')
 @Controller({
-    version: '1.0',
+    version: '1',
     path: '/plan',
 })
 export class WorkflowPlanController {
@@ -37,34 +44,38 @@ export class WorkflowPlanController {
         {
             plan,
             plan_date,
-            ent_time,
+            end_time,
             start_time,
             plan_list,
         }: WorkflowCreateRequestDto
     ): Promise<IResponse<WorkflowGetResponseDTO>> {
         const user = userId._id;
 
-        try {
-            await this.workflowService.filterWorkflowsByTime(
-                user,
-                plan_date,
-                start_time,
-                ent_time
-            );
+        if (!plan || !end_time || !start_time || !plan_date) {
+            throw new BadRequestException({
+                statusCode: 400,
+                message: 'plan.error.notPlan',
+            });
+        }
 
-            const created: WorkFlowEntity =
-                await this.workflowService.createPlan({
-                    plan,
-                    plan_list,
-                    user,
-                    start_time,
-                    plan_date,
-                    ent_time,
-                });
+        await this.workflowService.filterWorkflowsByTime(
+            user,
+            plan_date,
+            start_time,
+            end_time
+        );
 
-            return {
-                data: created as WorkflowGetResponseDTO,
-            };
-        } catch (err) {}
+        const created: WorkFlowEntity = await this.workflowService.createPlan({
+            plan,
+            plan_list,
+            user,
+            start_time,
+            plan_date,
+            end_time,
+        });
+
+        return {
+            data: created as WorkflowGetResponseDTO,
+        };
     }
 }

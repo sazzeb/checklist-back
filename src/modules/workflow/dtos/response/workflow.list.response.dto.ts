@@ -29,39 +29,40 @@ export class WorkflowListResponseDto extends DatabaseDto {
     @ApiProperty({
         required: true,
         description: 'Current date',
-        example: faker.date.timeZone(),
+        example: new Date(),
     })
     @IsNotEmpty()
-    @IsDate()
-    plan_date: string;
+    @IsDate({ message: 'Plan date must be a valid date' })
+    plan_date: Date;
 
     @ApiProperty({
         required: true,
         description: 'Start time',
-        example: faker.date.timeZone(),
+        example: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        }),
     })
     @IsNotEmpty()
-    @IsDate()
+    @IsDate({ message: 'Start time is not valid' })
     start_time: string;
 
     @ApiProperty({
         required: true,
         description: 'Start time',
-        example: faker.date.timeZone(),
+        example: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        }),
     })
     @IsNotEmpty()
-    @IsDate()
+    @IsDate({ message: 'End time is not valid' })
     ent_time: string;
 
     @ApiProperty({
         required: false,
         description: 'Make a plan list',
-        example: [
-            faker.helpers.arrayElement([
-                faker.lorem.sentence,
-                faker.lorem.sentence,
-            ]),
-        ],
+        example: [faker.lorem.sentence(3), faker.lorem.sentence(4)],
         isArray: true,
     })
     @IsArray()

@@ -35,7 +35,7 @@ export interface IWorkflowService {
     filterWorkflowsByTime(
         userId: string,
         planDate: Date,
-        startTime: string,
-        endTime: string
+        startTime: Date,
+        endTime: Date
     ): Promise<WorkFlowDoc[]>;
 }

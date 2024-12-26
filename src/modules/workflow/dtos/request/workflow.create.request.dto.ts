@@ -8,6 +8,7 @@ import {
     IsUUID,
     MaxLength,
     MinLength,
+    Matches,
 } from 'class-validator';
 
 export class WorkflowCreateRequestDto {
@@ -27,39 +28,34 @@ export class WorkflowCreateRequestDto {
     @ApiProperty({
         required: true,
         description: 'Current date',
-        example: faker.date.timeZone(),
+        example: new Date(),
     })
-    @IsNotEmpty()
-    @IsDate()
+    @IsNotEmpty({ message: 'Plan date must not be empty' })
+    @IsDate({ message: 'Plan date must be a valid date' })
     plan_date: Date;
 
     @ApiProperty({
         required: true,
-        description: 'Start time',
-        example: faker.date.timeZone(),
+        description: 'Start time with date included.',
+        example: new Date().toISOString(), // ISO 8601 format
     })
-    @IsNotEmpty()
-    @IsDate()
-    start_time: string;
+    @IsNotEmpty({ message: 'Start time must not be empty.' })
+    @IsDate({ message: 'Start time must be a valid date and time.' })
+    start_time: Date;
 
     @ApiProperty({
         required: true,
-        description: 'Start time',
-        example: faker.date.timeZone(),
+        description: 'Start time with date included.',
+        example: new Date().toISOString(), // ISO 8601 format
     })
-    @IsNotEmpty()
-    @IsDate()
-    ent_time: string;
+    @IsNotEmpty({ message: 'Start time must not be empty.' })
+    @IsDate({ message: 'Start time must be a valid date and time.' })
+    end_time: Date;
 
     @ApiProperty({
         required: false,
         description: 'Make a plan list',
-        example: [
-            faker.helpers.arrayElement([
-                faker.lorem.sentence,
-                faker.lorem.sentence,
-            ]),
-        ],
+        example: [faker.lorem.sentence(3), faker.lorem.sentence(4)],
         isArray: true,
     })
     @IsArray()

@@ -6,6 +6,8 @@ import {
 } from 'src/common/database/decorators/database.decorator';
 import { IDatabaseDocument } from 'src/common/database/interfaces/database.interface';
 import { UserEntity } from 'src/modules/user/repository/entities/user.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsDate } from 'class-validator';
 
 export const WorkFlowTableName = 'workflow';
 
@@ -18,6 +20,12 @@ export class WorkFlowEntity extends DatabaseEntityBase {
     })
     plan: string;
 
+    @ApiProperty({
+        required: true,
+        description: 'Plan date must be today or a future date.',
+        example: new Date().toISOString(),
+    })
+    @IsNotEmpty({ message: 'Plan date must not be empty' })
     @DatabaseProp({
         type: Date,
         required: true,
@@ -35,32 +43,33 @@ export class WorkFlowEntity extends DatabaseEntityBase {
     })
     plan_date: Date;
 
+    @ApiProperty({
+        required: true,
+        description: 'Start date and time for the plan.',
+        example: new Date().toISOString(),
+    })
+    @IsNotEmpty({ message: 'Start time must not be empty' })
+    @IsDate({ message: 'Start time must be a valid date and time.' })
     @DatabaseProp({
-        type: String,
+        type: Date,
         required: true,
         index: true,
-        validate: {
-            validator: function (value: string) {
-                // Regex for HH:MM AM/PM format
-                return /^(0?[1-9]|1[0-2]):([0-5]\d)\s?(AM|PM)$/i.test(value);
-            },
-            message: 'Start time must be in HH:MM AM/PM format.',
-        },
     })
-    start_time: string;
+    start_time: Date;
 
+    @ApiProperty({
+        required: true,
+        description: 'End date and time for the plan.',
+        example: new Date().toISOString(),
+    })
+    @IsNotEmpty({ message: 'End time must not be empty' })
+    @IsDate({ message: 'End time must be a valid date and time.' })
     @DatabaseProp({
-        type: String,
+        type: Date,
         required: true,
         index: true,
-        validate: {
-            validator: function (value: string) {
-                return /^(0?[1-9]|1[0-2]):([0-5]\d)\s?(AM|PM)$/i.test(value);
-            },
-            message: 'End time must be in HH:MM AM/PM format.',
-        },
     })
-    end_time: string;
+    end_time: Date;
 
     @DatabaseProp({
         optional: true,
