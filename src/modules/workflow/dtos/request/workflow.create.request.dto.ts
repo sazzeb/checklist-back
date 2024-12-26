@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { faker } from '@faker-js/faker';
 import {
     IsArray,
@@ -8,7 +9,6 @@ import {
     IsUUID,
     MaxLength,
     MinLength,
-    Matches,
 } from 'class-validator';
 
 export class WorkflowCreateRequestDto {
@@ -32,6 +32,7 @@ export class WorkflowCreateRequestDto {
     })
     @IsNotEmpty({ message: 'Plan date must not be empty' })
     @IsDate({ message: 'Plan date must be a valid date' })
+    @Type(() => Date)
     plan_date: Date;
 
     @ApiProperty({
@@ -41,6 +42,7 @@ export class WorkflowCreateRequestDto {
     })
     @IsNotEmpty({ message: 'Start time must not be empty.' })
     @IsDate({ message: 'Start time must be a valid date and time.' })
+    @Type(() => Date)
     start_time: Date;
 
     @ApiProperty({
@@ -50,6 +52,7 @@ export class WorkflowCreateRequestDto {
     })
     @IsNotEmpty({ message: 'Start time must not be empty.' })
     @IsDate({ message: 'Start time must be a valid date and time.' })
+    @Type(() => Date)
     end_time: Date;
 
     @ApiProperty({

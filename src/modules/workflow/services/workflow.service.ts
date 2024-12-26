@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { IWorkflowService } from '../interfaces/workflow.service.interface';
 import { WorkflowRepository } from '../repository/repositories/workflow.repositories';
 import {
@@ -77,23 +77,64 @@ export class WorkflowService implements IWorkflowService {
         startTime: Date,
         endTime: Date
     ): Promise<WorkFlowDoc[]> {
-        if (startTime >= endTime) {
-            throw new Error('Start time must be less than end time.');
+        const now = new Date();
+        const currentTimePlus30Min = new Date(now.getTime() + 15 * 60 * 1000); // Current time + 30 minutes
+
+        // Ensure start_time is at least 30 minutes greater than the current time
+        if (startTime <= currentTimePlus30Min) {
+            throw new BadRequestException({
+                message:
+                    'Creating a to plan must be schedule 15 minute from the current time.',
+            });
         }
 
-        return await this.workflowRepository.findAll({
-            userId: userId,
+        // Ensure start_time is less than end_time
+        if (startTime >= endTime) {
+            throw new BadRequestException({
+                message: 'Start time must be less than end time.',
+            });
+        }
+
+        // Ensure start_time and end_time correspond to the same day as plan_date
+        const isSameDay = (date: Date, targetDate: Date) => {
+            return (
+                date.getUTCFullYear() === targetDate.getUTCFullYear() &&
+                date.getUTCMonth() === targetDate.getUTCMonth() &&
+                date.getUTCDate() === targetDate.getUTCDate()
+            );
+        };
+
+        if (!isSameDay(startTime, planDate) || !isSameDay(endTime, planDate)) {
+            throw new BadRequestException({
+                message:
+                    'Start time and end time must correspond to the same day as the plan date.',
+            });
+        }
+
+        // Check for overlaps in the database
+        const plans = await this.workflowRepository.exists({
+            user: userId,
             plan_date: {
                 $eq: planDate, // Match specific date
             },
             $or: [
                 {
                     $and: [
-                        { start_time: { $lte: endTime } },
-                        { end_time: { $gte: startTime } },
+                        { start_time: { $lte: endTime } }, // Existing start_time is before or at requested endTime
+                        { end_time: { $gte: startTime } }, // Existing end_time is after or at requested startTime
                     ],
                 },
             ],
         });
+
+        // If there are overlapping plans, throw an exception
+        if (plans) {
+            throw new BadRequestException({
+                message:
+                    'The plan time already exists. Choose a different time.',
+            });
+        }
+
+        return;
     }
 }

@@ -11,7 +11,7 @@ export function WorkflowSystemGetDoc(): MethodDecorator {
     return applyDecorators(
         Doc({ summary: 'Get Doc workflow Documentation' }),
         DocAuth({ xApiKey: true }),
-        DocResponsePaging<WorkflowGetResponseDTO>('workflow.index', {
+        DocResponsePaging<WorkflowGetResponseDTO>('plan.create', {
             dto: WorkflowGetResponseDTO,
         })
     );
@@ -21,7 +21,7 @@ export function WorkflowSystemListDoc(): MethodDecorator {
     return applyDecorators(
         Doc({ summary: 'Get Doc workflow Documentation' }),
         DocAuth({ xApiKey: true }),
-        DocResponsePaging<WorkflowListResponseDto>('workflow.index', {
+        DocResponsePaging<WorkflowListResponseDto>('plan.index', {
             dto: WorkflowListResponseDto,
         })
     );

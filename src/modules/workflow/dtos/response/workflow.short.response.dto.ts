@@ -8,7 +8,7 @@ export class WorkflowShortResponseDto extends OmitType(
 ) {
     @ApiHideProperty()
     @Exclude()
-    plan_list: string;
+    plan_list: string[];
 
     @ApiHideProperty()
     @Exclude()

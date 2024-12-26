@@ -37,27 +37,21 @@ export class WorkflowListResponseDto extends DatabaseDto {
 
     @ApiProperty({
         required: true,
-        description: 'Start time',
-        example: new Date().toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-        }),
+        description: 'Start time with date included.',
+        example: new Date().toISOString(), // ISO 8601 format
     })
-    @IsNotEmpty()
-    @IsDate({ message: 'Start time is not valid' })
-    start_time: string;
+    @IsNotEmpty({ message: 'Start time must not be empty.' })
+    @IsDate({ message: 'Start time must be a valid date and time.' })
+    start_time: Date;
 
     @ApiProperty({
         required: true,
-        description: 'Start time',
-        example: new Date().toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-        }),
+        description: 'Start time with date included.',
+        example: new Date().toISOString(), // ISO 8601 format
     })
-    @IsNotEmpty()
-    @IsDate({ message: 'End time is not valid' })
-    ent_time: string;
+    @IsNotEmpty({ message: 'Start time must not be empty.' })
+    @IsDate({ message: 'Start time must be a valid date and time.' })
+    end_time: Date;
 
     @ApiProperty({
         required: false,
