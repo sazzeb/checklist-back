@@ -9,6 +9,7 @@ import {
     IDatabaseFindOneOptions,
     IDatabaseGetTotalOptions,
     IDatabaseSaveOptions,
+    IDatabaseUpdateOptions,
 } from 'src/common/database/interfaces/database.interface';
 import {
     WorkFlowDoc,
@@ -20,6 +21,8 @@ import { plainToInstance } from 'class-transformer';
 import { WorkflowUpdateRequestDto } from '../dtos/request/workflow.update.request.dto';
 import { WorkflowFilterStartEnd } from '../constants/workflow.filter.start.end';
 import { WorkflowShortResponseDto } from '../dtos/response/workflow.short.response.dto';
+import { tr } from '@faker-js/faker';
+import console from 'node:console';
 
 @Injectable()
 export class WorkflowService implements IWorkflowService {
@@ -45,6 +48,13 @@ export class WorkflowService implements IWorkflowService {
         options?: IDatabaseFindAllOptions
     ): Promise<WorkFlowDoc[]> {
         return this.workflowRepository.findAll<WorkFlowDoc>(find, options);
+    }
+
+    async findShortLimited(
+        find?: Record<string, any>,
+        options?: IDatabaseFindAllOptions
+    ): Promise<WorkFlowDoc[]> {
+        return this.workflowRepository.findSelect(find, options);
     }
 
     async findAllByUserAndPlanDate(
@@ -213,5 +223,41 @@ export class WorkflowService implements IWorkflowService {
         }
 
         return;
+    }
+
+    async updateWorkflowRating(
+        user: string,
+        _id: string,
+        rating: number,
+        options?: IDatabaseUpdateOptions
+    ): Promise<WorkFlowDoc> {
+        let completion_percentage: number;
+
+        const rated: boolean = await this.workflowRepository.exists({
+            user,
+            _id,
+            isDone: true,
+        });
+
+        if (rated) {
+            throw new BadRequestException({
+                message:
+                    'Sorry plans cannot be rated twice, one rating is enough',
+            });
+        }
+
+        if (rating === 5) {
+            completion_percentage = 100;
+        } else if (rating === 3) {
+            completion_percentage = 60;
+        } else if (rating === 1) {
+            completion_percentage = 20;
+        }
+
+        return this.workflowRepository.update(
+            { user, _id },
+            { rating, isDone: true, completion_percentage },
+            options
+        );
     }
 }

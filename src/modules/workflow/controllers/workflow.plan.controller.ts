@@ -15,6 +15,8 @@ import { WorkflowCreateRequestDto } from 'src/modules/workflow/dtos/request/work
 import {
     WorkflowPlanCreateDto,
     WorkflowPlanListDto,
+    WorkflowPlanRateDoc,
+    WorkflowPlanShortListDto,
     WorkflowPlanUpdateDoc,
 } from 'src/modules/workflow/docs/workflow.plan.doc';
 import {
@@ -55,6 +57,11 @@ import { RequestRequiredPipe } from '../../../common/request/pipes/request.requi
 import { WorkflowParsePipe } from '../pipes/workflow.parse.pipe';
 import { WorkflowUpdateRequestDto } from '../dtos/request/workflow.update.request.dto';
 import { DatabaseIdResponseDto } from '../../../common/database/dtos/response/database.id.response.dto';
+import { WorkflowShortResponseDto } from '../dtos/response/workflow.short.response.dto';
+import { tr } from '@faker-js/faker';
+import * as console from 'node:console';
+import { WorkflowRateRequestDto } from '../dtos/request/workflow.rate.request.dto';
+import { WorkflowRateResponseDto } from '../dtos/response/workflow.rate.response.dto';
 
 @ApiTags('workflow')
 @Controller({
@@ -248,6 +255,67 @@ export class WorkflowPlanController {
             throw new BadRequestException({
                 statusCode: 500,
                 message: e.message,
+            });
+        }
+    }
+
+    @WorkflowPlanRateDoc()
+    @Response('plan.rating')
+    @AuthJwtAccessProtected()
+    @ApiKeyProtected()
+    @Put('/rate/:rate/plan')
+    async rate(
+        @Param('rate') _id: string,
+        @Body() { rating }: WorkflowRateRequestDto,
+        @AuthJwtPayload<AuthJwtAccessPayloadDto>('_id', UserParsePipe)
+        user: UserDoc
+    ): Promise<IResponse<DatabaseIdResponseDto>> {
+        try {
+            await this.workflowService.updateWorkflowRating(
+                user._id,
+                _id,
+                rating
+            );
+            return {
+                data: { _id: _id },
+            };
+        } catch (e) {
+            throw new BadRequestException({
+                statusCode: 500,
+                message: e.message,
+            });
+        }
+    }
+
+    @WorkflowPlanShortListDto()
+    @Response('plan.short')
+    @AuthJwtAccessProtected()
+    @ApiKeyProtected()
+    @HttpCode(HttpStatus.OK)
+    @Get('chosen/date/:plan_date')
+    async planDateChosen(
+        @Param('plan_date') plan_date: string,
+        @AuthJwtPayload<AuthJwtAccessPayloadDto>('_id', UserParsePipe)
+        user: UserDoc
+    ): Promise<IResponse<WorkflowShortResponseDto[]>> {
+        try {
+            const find: Record<string, any> = {
+                user: user._id,
+                plan_date: plan_date,
+            };
+            const repository: WorkFlowDoc[] =
+                await this.workflowService.findShortLimited(find);
+
+            const mapped: WorkflowShortResponseDto[] =
+                await this.workflowService.mapListShort(repository);
+
+            return {
+                data: mapped,
+            };
+        } catch (err) {
+            throw new BadRequestException({
+                statusCode: 500,
+                message: err.message,
             });
         }
     }

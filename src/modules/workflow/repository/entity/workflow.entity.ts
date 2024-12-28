@@ -7,7 +7,8 @@ import {
 import { IDatabaseDocument } from 'src/common/database/interfaces/database.interface';
 import { UserEntity } from 'src/modules/user/repository/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsDate } from 'class-validator';
+import { IsNotEmpty, IsDate, IsOptional, IsNumber } from 'class-validator';
+import { fa } from '@faker-js/faker';
 
 export const WorkFlowTableName = 'workflow';
 
@@ -84,6 +85,42 @@ export class WorkFlowEntity extends DatabaseEntityBase {
         trim: true,
     })
     user: string;
+
+    @ApiProperty({
+        required: false,
+        description: 'Percentage completion for the plan.',
+        example: 80,
+    })
+    @IsOptional()
+    @IsNumber()
+    @DatabaseProp({
+        type: Number,
+        min: 0,
+        max: 100,
+        required: false,
+    })
+    completion_percentage?: number; // Stores the percentage of completion for the plan
+
+    @ApiProperty({
+        required: false,
+        description: 'Rating for the plan.',
+        example: 5,
+    })
+    @IsOptional()
+    @IsNumber()
+    @DatabaseProp({
+        type: Number,
+        enum: [1, 3, 5],
+        required: false,
+    })
+    rating?: number; // Stores the rating provided by the user
+
+    @DatabaseProp({
+        required: false,
+        index: true,
+        example: false,
+    })
+    isDone: boolean;
 }
 
 export const WorkFlowEntitySchema = DatabaseSchema(WorkFlowEntity);

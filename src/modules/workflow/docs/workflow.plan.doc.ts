@@ -13,6 +13,7 @@ import { WorkflowUpdateRequestDto } from '../dtos/request/workflow.update.reques
 import { DatabaseIdResponseDto } from '../../../common/database/dtos/response/database.id.response.dto';
 import { WorkflowDocParamsId } from '../constants/workflow.doc.constant';
 import { WorkflowShortResponseDto } from '../dtos/response/workflow.short.response.dto';
+import { WorkflowRateResponseDto } from '../dtos/response/workflow.rate.response.dto';
 
 export function WorkflowPlanCreateDto(): MethodDecorator {
     return applyDecorators(
@@ -53,7 +54,7 @@ export function WorkflowPlanListDto(): MethodDecorator {
 export function WorkflowPlanShortListDto(): MethodDecorator {
     return applyDecorators(
         Doc({
-            summary: 'Create a plan',
+            summary: 'Listed plans',
         }),
         DocRequest({
             bodyType: ENUM_DOC_REQUEST_BODY_TYPE.JSON,
@@ -62,7 +63,7 @@ export function WorkflowPlanShortListDto(): MethodDecorator {
         DocAuth({
             xApiKey: true,
         }),
-        DocResponse('plan.create', {
+        DocResponse('plan.short', {
             httpStatus: HttpStatus.CREATED,
         })
     );
@@ -83,6 +84,26 @@ export function WorkflowPlanUpdateDoc(): MethodDecorator {
             jwtAccessToken: true,
         }),
         DocResponse('plan.update', {
+            dto: DatabaseIdResponseDto,
+        })
+    );
+}
+
+export function WorkflowPlanRateDoc(): MethodDecorator {
+    return applyDecorators(
+        Doc({
+            summary: 'Rate a plan',
+        }),
+        DocRequest({
+            bodyType: ENUM_DOC_REQUEST_BODY_TYPE.JSON,
+            dto: WorkflowRateResponseDto,
+        }),
+
+        DocAuth({
+            xApiKey: true,
+            jwtAccessToken: true,
+        }),
+        DocResponse('plan.rate', {
             dto: DatabaseIdResponseDto,
         })
     );

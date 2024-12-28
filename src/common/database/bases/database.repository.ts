@@ -80,6 +80,24 @@ export class DatabaseRepositoryBase<
         return repository.exec();
     }
 
+    async findSelect<T = EntityDocument>(
+        find?: Record<string, any>,
+        options?: IDatabaseFindAllOptions
+    ): Promise<T[]> {
+        const repository = this._repository
+            .find<T>({
+                ...find,
+                deleted: options?.withDeleted ?? false,
+            })
+            .select('_id start_time end_time plan_date'); // Select specific fields
+
+        if (options?.session) {
+            repository.session(options.session);
+        }
+
+        return repository.exec();
+    }
+
     async findOne<T = EntityDocument>(
         find: Record<string, any>,
         options?: IDatabaseFindOneOptions

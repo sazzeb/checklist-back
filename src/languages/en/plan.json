@@ -2,6 +2,9 @@
   "index":  "Fetch all plan successfully",
   "create": "Todo plan created",
   "chosen": "Get all selected Date",
+  "short": "Selected date chosen for users",
+  "update": "Plans updated completely",
+  "rating": "Congratulation you have rated you plans",
   "error": {
     "created": "There was an error adding a plan",
     "notPlan": "Incorrect data provided"

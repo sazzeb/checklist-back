@@ -5,6 +5,7 @@ import {
     IDatabaseFindAllOptions,
     IDatabaseGetTotalOptions,
     IDatabaseOptions,
+    IDatabaseSaveOptions,
     IDatabaseUpdateOptions,
 } from 'src/common/database/interfaces/database.interface';
 import {
@@ -73,4 +74,10 @@ export interface IWorkflowService {
     mapListShort(
         workflows: WorkFlowDoc[] | WorkFlowEntity[]
     ): Promise<WorkflowShortResponseDto[]>;
+    updateWorkflowRating(
+        userId: string,
+        repositoryId: string,
+        repository: number,
+        options: IDatabaseSaveOptions
+    ): Promise<WorkFlowDoc>;
 }
