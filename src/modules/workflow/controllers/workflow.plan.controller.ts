@@ -15,7 +15,6 @@ import { WorkflowCreateRequestDto } from 'src/modules/workflow/dtos/request/work
 import {
     WorkflowPlanCreateDto,
     WorkflowPlanListDto,
-    WorkflowPlanRateDoc,
     WorkflowPlanShortListDto,
     WorkflowPlanUpdateDoc,
 } from 'src/modules/workflow/docs/workflow.plan.doc';
@@ -44,24 +43,12 @@ import { WorkflowListResponseDto } from '../dtos/response/workflow.list.response
 import { PaginationQuery } from '../../../common/pagination/decorators/pagination.decorator';
 import { PaginationListDto } from '../../../common/pagination/dtos/pagination.list.dto';
 import { PaginationService } from '../../../common/pagination/services/pagination.service';
-import {
-    PolicyAbilityProtected,
-    PolicyRoleProtected,
-} from '../../policy/decorators/policy.decorator';
-import {
-    ENUM_POLICY_ACTION,
-    ENUM_POLICY_ROLE_TYPE,
-    ENUM_POLICY_SUBJECT,
-} from '../../policy/enums/policy.enum';
+
 import { RequestRequiredPipe } from '../../../common/request/pipes/request.required.pipe';
 import { WorkflowParsePipe } from '../pipes/workflow.parse.pipe';
 import { WorkflowUpdateRequestDto } from '../dtos/request/workflow.update.request.dto';
 import { DatabaseIdResponseDto } from '../../../common/database/dtos/response/database.id.response.dto';
 import { WorkflowShortResponseDto } from '../dtos/response/workflow.short.response.dto';
-import { tr } from '@faker-js/faker';
-import * as console from 'node:console';
-import { WorkflowRateRequestDto } from '../dtos/request/workflow.rate.request.dto';
-import { WorkflowRateResponseDto } from '../dtos/response/workflow.rate.response.dto';
 
 @ApiTags('workflow')
 @Controller({
@@ -250,34 +237,6 @@ export class WorkflowPlanController {
                 await this.workflowService.update(plan, payload);
             return {
                 data: { _id: updated.plan, ...updated },
-            };
-        } catch (e) {
-            throw new BadRequestException({
-                statusCode: 500,
-                message: e.message,
-            });
-        }
-    }
-
-    @WorkflowPlanRateDoc()
-    @Response('plan.rating')
-    @AuthJwtAccessProtected()
-    @ApiKeyProtected()
-    @Put('/rate/:rate/plan')
-    async rate(
-        @Param('rate') _id: string,
-        @Body() { rating }: WorkflowRateRequestDto,
-        @AuthJwtPayload<AuthJwtAccessPayloadDto>('_id', UserParsePipe)
-        user: UserDoc
-    ): Promise<IResponse<DatabaseIdResponseDto>> {
-        try {
-            await this.workflowService.updateWorkflowRating(
-                user._id,
-                _id,
-                rating
-            );
-            return {
-                data: { _id: _id },
             };
         } catch (e) {
             throw new BadRequestException({

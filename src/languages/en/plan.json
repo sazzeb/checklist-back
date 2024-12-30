@@ -5,6 +5,10 @@
   "short": "Selected date chosen for users",
   "update": "Plans updated completely",
   "rating": "Congratulation you have rated you plans",
+  "daily": "See your daily plans",
+  "weekly": "Statistics analysis data for users",
+  "month": "See your month plans",
+  "year": "See your month plans",
   "error": {
     "created": "There was an error adding a plan",
     "notPlan": "Incorrect data provided"

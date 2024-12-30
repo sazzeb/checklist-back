@@ -601,4 +601,235 @@ export class DatabaseRepositoryBase<
     async model(): Promise<Model<Entity>> {
         return this._repository;
     }
+
+    async getDailyStatisticsCaptains(
+        user: string,
+        planDate: string,
+        options?: IDatabaseAggregateOptions
+    ): Promise<{ averageRating: number; averageCompletion: number }> {
+        // Normalize the date to start of the day
+        const startOfDay = new Date(planDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        // End of the day
+        const endOfDay = new Date(planDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        // Aggregate data for the specific user
+        const result = await this._repository.aggregate([
+            {
+                $match: {
+                    user, // Filter by user
+                    plan_date: { $gte: startOfDay, $lte: endOfDay },
+                    rating: { $exists: true },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    averageRating: { $avg: '$rating' },
+                    averageCompletion: { $avg: '$completion_percentage' },
+                },
+            },
+        ]);
+
+        // Return the results
+        if (result.length > 0) {
+            return {
+                averageRating: result[0].averageRating || 0,
+                averageCompletion: result[0].averageCompletion || 0,
+            };
+        }
+
+        // Default to 0 if no data exists
+        return { averageRating: 0, averageCompletion: 0 };
+    }
+
+    async getDailyStatistics(
+        user: string,
+        planDate: Date,
+        options?: IDatabaseAggregateOptions
+    ): Promise<any> {
+        const normalizedDate = new Date(planDate);
+        normalizedDate.setHours(0, 0, 0, 0);
+
+        const endNormalizedDateOfDay = new Date(planDate);
+        endNormalizedDateOfDay.setHours(23, 59, 59, 999);
+
+        const pipelines: PipelineStage[] = [
+            {
+                $match: {
+                    user,
+                    plan_date: {
+                        $gte: normalizedDate,
+                        $lte: endNormalizedDateOfDay,
+                    },
+                    rating: { $exists: true },
+                },
+            },
+            {
+                $group: {
+                    _id: '$plan_date',
+                    dailyAverageCompletion: { $avg: '$completion_percentage' },
+                    dailyAverageRating: { $avg: '$rating' },
+                    totalPlans: { $sum: 1 },
+                    ratings: { $push: '$rating' }, // Collect all ratings
+                    completions: { $push: '$completion_percentage' }, // Collect all completion percentages
+                },
+            },
+            {
+                $project: {
+                    _id: 0, // Exclude the group ID from the output
+                    planDate: '$_id',
+                    dailyAverageCompletion: 1,
+                    dailyAverageRating: 1,
+                    totalPlans: 1,
+                    ratings: 1,
+                    completions: 1,
+                },
+            },
+        ];
+
+        const repository: Model<Entity> = await this.model();
+        return repository.aggregate(pipelines);
+    }
+
+    async getWeeklyStatistics(
+        user: string,
+        startDate: Date,
+        endDate: Date,
+        options?: IDatabaseAggregateOptions
+    ): Promise<any> {
+        const normalizedStartDate = new Date(startDate);
+        normalizedStartDate.setHours(0, 0, 0, 0);
+
+        const normalizedEndDate = new Date(endDate);
+        normalizedEndDate.setHours(23, 59, 59, 999);
+
+        const pipelines: PipelineStage[] = [
+            {
+                $match: {
+                    user,
+                    plan_date: {
+                        $gte: normalizedStartDate,
+                        $lte: normalizedEndDate,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: { $week: '$plan_date' },
+                    dailyData: {
+                        $push: {
+                            date: '$plan_date',
+                            averageCompletion: {
+                                $avg: '$completion_percentage',
+                            },
+                            averageRating: { $avg: '$rating' },
+                            count: { $sum: 1 },
+                        },
+                    },
+                    weeklyAverageCompletion: { $avg: '$completion_percentage' },
+                    weeklyAverageRating: { $avg: '$rating' },
+                    totalPlans: { $sum: 1 },
+                },
+            },
+        ];
+
+        const repository: Model<Entity> = await this.model();
+        return repository.aggregate(pipelines);
+    }
+
+    async getMonthlyStatistics(
+        user: string,
+        year: number,
+        month: number,
+        options?: IDatabaseAggregateOptions
+    ): Promise<any[]> {
+        const startOfMonth = new Date(year, month - 1, 1);
+        const endOfMonth = new Date(year, month, 0);
+
+        startOfMonth.setHours(0, 0, 0, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
+
+        const pipelines: PipelineStage[] = [
+            {
+                $match: {
+                    user,
+                    plan_date: {
+                        $gte: startOfMonth,
+                        $lte: endOfMonth,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: { $month: '$plan_date' },
+                    dailyData: {
+                        $push: {
+                            date: '$plan_date',
+                            averageCompletion: {
+                                $avg: '$completion_percentage',
+                            },
+                            averageRating: { $avg: '$rating' },
+                            count: { $sum: 1 },
+                        },
+                    },
+                    monthlyAverageCompletion: {
+                        $avg: '$completion_percentage',
+                    },
+                    monthlyAverageRating: { $avg: '$rating' },
+                    totalPlans: { $sum: 1 },
+                },
+            },
+        ];
+
+        const repository: Model<Entity> = await this.model();
+        return repository.aggregate(pipelines);
+    }
+
+    async getYearlyStatistics(
+        user: string,
+        year: number,
+        options?: IDatabaseAggregateOptions
+    ): Promise<any[]> {
+        const startOfYear = new Date(year, 0, 1);
+        const endOfYear = new Date(year, 11, 31);
+
+        startOfYear.setHours(0, 0, 0, 0);
+        endOfYear.setHours(23, 59, 59, 999);
+
+        const pipelines: PipelineStage[] = [
+            {
+                $match: {
+                    user,
+                    plan_date: {
+                        $gte: startOfYear,
+                        $lte: endOfYear,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: { $year: '$plan_date' },
+                    monthlyData: {
+                        $push: {
+                            month: { $month: '$plan_date' },
+                            averageCompletion: {
+                                $avg: '$completion_percentage',
+                            },
+                            averageRating: { $avg: '$rating' },
+                            count: { $sum: 1 },
+                        },
+                    },
+                    yearlyAverageCompletion: { $avg: '$completion_percentage' },
+                    yearlyAverageRating: { $avg: '$rating' },
+                    totalPlans: { $sum: 1 },
+                },
+            },
+        ];
+
+        const repository: Model<Entity> = await this.model();
+        return repository.aggregate(pipelines);
+    }
 }

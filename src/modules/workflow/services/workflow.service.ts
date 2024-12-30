@@ -3,11 +3,13 @@ import { IWorkflowService } from '../interfaces/workflow.service.interface';
 import { WorkflowRepository } from '../repository/repositories/workflow.repositories';
 import { Document } from 'mongoose';
 import {
+    IDatabaseAggregateOptions,
     IDatabaseCreateManyOptions,
     IDatabaseDeleteManyOptions,
     IDatabaseFindAllOptions,
     IDatabaseFindOneOptions,
     IDatabaseGetTotalOptions,
+    IDatabaseOptions,
     IDatabaseSaveOptions,
     IDatabaseUpdateOptions,
 } from 'src/common/database/interfaces/database.interface';
@@ -259,5 +261,85 @@ export class WorkflowService implements IWorkflowService {
             { rating, isDone: true, completion_percentage },
             options
         );
+    }
+
+    async analysisDaily(
+        user: string,
+        planDate: Date,
+        options?: IDatabaseAggregateOptions
+    ): Promise<void> {
+        try {
+            return await this.workflowRepository.getDailyStatistics(
+                user,
+                planDate,
+                options
+            );
+        } catch (err) {
+            throw new BadRequestException({
+                statusCode: 500,
+                message: err.message,
+            });
+        }
+    }
+
+    async analysisWeeklyData(
+        user: string,
+        startDate: Date,
+        endDate: Date,
+        options?: IDatabaseAggregateOptions
+    ): Promise<any> {
+        try {
+            return await this.workflowRepository.getWeeklyStatistics(
+                user,
+                startDate,
+                endDate,
+                options
+            );
+        } catch (err) {
+            throw new BadRequestException({
+                statusCode: 500,
+                message: err.message,
+            });
+        }
+    }
+
+    async analysisMonthStatistics(
+        user: string,
+        year: number,
+        month: number,
+        options?: IDatabaseAggregateOptions
+    ): Promise<any> {
+        try {
+            return await this.workflowRepository.getMonthlyStatistics(
+                user,
+                year,
+                month,
+                options
+            );
+        } catch (err) {
+            throw new BadRequestException({
+                statusCode: 500,
+                message: err.message,
+            });
+        }
+    }
+
+    async analysisYearStatistics(
+        user: string,
+        year: number,
+        options?: IDatabaseAggregateOptions
+    ): Promise<any> {
+        try {
+            return await this.workflowRepository.getYearlyStatistics(
+                user,
+                year,
+                options
+            );
+        } catch (err) {
+            throw new BadRequestException({
+                statusCode: 500,
+                message: err.message,
+            });
+        }
     }
 }

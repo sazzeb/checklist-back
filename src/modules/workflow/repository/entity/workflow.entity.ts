@@ -8,7 +8,6 @@ import { IDatabaseDocument } from 'src/common/database/interfaces/database.inter
 import { UserEntity } from 'src/modules/user/repository/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsDate, IsOptional, IsNumber } from 'class-validator';
-import { fa } from '@faker-js/faker';
 
 export const WorkFlowTableName = 'workflow';
 

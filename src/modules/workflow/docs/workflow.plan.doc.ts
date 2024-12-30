@@ -108,3 +108,19 @@ export function WorkflowPlanRateDoc(): MethodDecorator {
         })
     );
 }
+
+export function WorkflowPlanStatisticsResponseDoc(): MethodDecorator {
+    return applyDecorators(
+        Doc({
+            summary: 'Your plan statistics is available',
+        }),
+
+        DocAuth({
+            xApiKey: true,
+            jwtAccessToken: true,
+        }),
+        DocResponse('plan.rate', {
+            dto: DatabaseIdResponseDto,
+        })
+    );
+}
