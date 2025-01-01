@@ -717,21 +717,64 @@ export class DatabaseRepositoryBase<
                 },
             },
             {
-                $group: {
-                    _id: { $week: '$plan_date' },
-                    dailyData: {
-                        $push: {
-                            date: '$plan_date',
-                            averageCompletion: {
-                                $avg: '$completion_percentage',
+                $facet: {
+                    daily: [
+                        {
+                            $group: {
+                                _id: {
+                                    dayOfWeek: { $dayOfWeek: '$plan_date' }, // Group by day of the week
+                                    date: {
+                                        $dateToString: {
+                                            format: '%Y-%m-%d',
+                                            date: '$plan_date',
+                                        },
+                                    },
+                                },
+                                dailyAverageCompletion: {
+                                    $avg: '$completion_percentage',
+                                },
+                                dailyAverageRating: { $avg: '$rating' },
+                                totalPlans: { $sum: 1 },
                             },
-                            averageRating: { $avg: '$rating' },
-                            count: { $sum: 1 },
                         },
-                    },
-                    weeklyAverageCompletion: { $avg: '$completion_percentage' },
-                    weeklyAverageRating: { $avg: '$rating' },
-                    totalPlans: { $sum: 1 },
+                        {
+                            $sort: { '_id.date': 1 }, // Sort results by date
+                        },
+                        {
+                            $project: {
+                                dayOfWeek: '$_id.dayOfWeek',
+                                date: '$_id.date',
+                                averageCompletion: '$dailyAverageCompletion',
+                                averageRating: '$dailyAverageRating',
+                                totalPlans: '$totalPlans',
+                                _id: 0, // Exclude _id from the final output
+                            },
+                        },
+                    ],
+                    weekly: [
+                        {
+                            $group: {
+                                _id: { $week: '$plan_date' },
+                                weeklyAverageCompletion: {
+                                    $avg: '$completion_percentage',
+                                },
+                                weeklyAverageRating: { $avg: '$rating' },
+                                totalPlans: { $sum: 1 },
+                            },
+                        },
+                        {
+                            $sort: { _id: 1 }, // Sort results by week number
+                        },
+                        {
+                            $project: {
+                                week: '$_id',
+                                averageCompletion: '$weeklyAverageCompletion',
+                                averageRating: '$weeklyAverageRating',
+                                totalPlans: '$totalPlans',
+                                _id: 0, // Exclude _id from the final output
+                            },
+                        },
+                    ],
                 },
             },
         ];
