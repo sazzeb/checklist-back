@@ -265,7 +265,7 @@ export class WorkflowService implements IWorkflowService {
 
     async analysisDaily(
         user: string,
-        planDate: Date,
+        planDate: string,
         options?: IDatabaseAggregateOptions
     ): Promise<void> {
         try {
@@ -284,8 +284,8 @@ export class WorkflowService implements IWorkflowService {
 
     async analysisWeeklyData(
         user: string,
-        startDate: Date,
-        endDate: Date,
+        startDate: string,
+        endDate: string,
         options?: IDatabaseAggregateOptions
     ): Promise<any> {
         try {

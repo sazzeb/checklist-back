@@ -647,7 +647,7 @@ export class DatabaseRepositoryBase<
 
     async getDailyStatistics(
         user: string,
-        planDate: Date,
+        planDate: string,
         options?: IDatabaseAggregateOptions
     ): Promise<any> {
         const normalizedDate = new Date(planDate);
@@ -696,8 +696,8 @@ export class DatabaseRepositoryBase<
 
     async getWeeklyStatistics(
         user: string,
-        startDate: Date,
-        endDate: Date,
+        startDate: string,
+        endDate: string,
         options?: IDatabaseAggregateOptions
     ): Promise<any> {
         const normalizedStartDate = new Date(startDate);

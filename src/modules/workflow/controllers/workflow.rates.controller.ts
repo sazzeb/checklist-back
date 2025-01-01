@@ -74,7 +74,7 @@ export class WorkflowRatesController {
     @HttpCode(HttpStatus.OK)
     @Get('statistics/daily/:plan_date')
     async dailyStatistics(
-        @Param('plan_date') { plan_date }: WorkflowDailyResponseDto,
+        @Param('plan_date') plan_date: string,
         @AuthJwtPayload<AuthJwtAccessPayloadDto>('_id', UserParsePipe)
         user: UserDoc
     ): Promise<IResponse> {
@@ -101,8 +101,8 @@ export class WorkflowRatesController {
     @HttpCode(HttpStatus.OK)
     @Get('statistics/weekly/:weekStart/:weekEnd')
     async weeklyStatistics(
-        @Param('weekStart') { weekStart }: WorkflowWeeklyResponseDto,
-        @Param('weekEnd') { weekEnd }: WorkflowWeeklyResponseDto,
+        @Param('weekStart') weekStart: string,
+        @Param('weekEnd') weekEnd: string,
         @AuthJwtPayload<AuthJwtAccessPayloadDto>('_id', UserParsePipe)
         user: UserDoc
     ): Promise<IResponse> {
@@ -130,8 +130,8 @@ export class WorkflowRatesController {
     @HttpCode(HttpStatus.OK)
     @Get('statistics/month/:year/monthly/:month')
     async monthlyStatistics(
-        @Param('year') { year }: WorkflowMonthlyResponseDto,
-        @Param('month') { month }: WorkflowMonthlyResponseDto,
+        @Param('year') year: number,
+        @Param('month') month: number,
         @AuthJwtPayload<AuthJwtAccessPayloadDto>('_id', UserParsePipe)
         user: UserDoc
     ): Promise<IResponse> {
@@ -159,7 +159,7 @@ export class WorkflowRatesController {
     @HttpCode(HttpStatus.OK)
     @Get('statistics/month/years/:year')
     async yearlyStatistics(
-        @Param('year') { year }: WorkflowYearlyResponseDto,
+        @Param('year') year: number,
         @AuthJwtPayload<AuthJwtAccessPayloadDto>('_id', UserParsePipe)
         user: UserDoc
     ): Promise<IResponse> {
