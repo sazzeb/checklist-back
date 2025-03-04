@@ -42,7 +42,8 @@ export class AppHttpFilter implements ExceptionFilter {
 
         if (
             !request.path.startsWith(this.globalPrefix) &&
-            !request.path.startsWith(this.docPrefix)
+            !request.path.startsWith(this.docPrefix) &&
+            !request.path.startsWith('/.well-known/acme-challenge/')
         ) {
             response.redirect(HttpStatus.PERMANENT_REDIRECT, '/docs');
 
